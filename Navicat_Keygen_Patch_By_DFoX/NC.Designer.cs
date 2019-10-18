@@ -222,9 +222,9 @@
             this.rmod.AutoSize = true;
             this.rmod.Location = new System.Drawing.Point(81, 18);
             this.rmod.Name = "rmod";
-            this.rmod.Size = new System.Drawing.Size(70, 17);
+            this.rmod.Size = new System.Drawing.Size(88, 17);
             this.rmod.TabIndex = 25;
-            this.rmod.Text = "Modeler";
+            this.rmod.Text = "Modeler v3";
             this.rmod.UseVisualStyleBackColor = true;
             this.rmod.CheckedChanged += new System.EventHandler(this.rn11_CheckedChanged);
             // 
@@ -809,7 +809,7 @@
             this.MinimumSize = new System.Drawing.Size(594, 621);
             this.Name = "FNavicat";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Navicat Products - Patch/Keygen v4.9";
+            this.Text = "Navicat Products - Patch/Keygen v{0}.{1}";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FNavicat_FormClosing);
             this.Load += new System.EventHandler(this.NC_Load);
             this.g1.ResumeLayout(false);

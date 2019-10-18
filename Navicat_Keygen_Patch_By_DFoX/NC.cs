@@ -1,6 +1,4 @@
-﻿using Microsoft.Win32;
-using Navicat_Keygen_Patch_By_DFoX.Properties;
-using Newtonsoft.Json;
+﻿using Navicat_Keygen_Patch_By_DFoX.Properties;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
@@ -17,6 +15,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 namespace Navicat_Keygen_Patch_By_DFoX
@@ -32,7 +31,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
         private string exefile = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\navicat.exe";
         private string exefiledm = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\modeler.exe";
         private string gpath = @"C:\Program Files{0}\PremiumSoft\Navicat Premium {1}\{2}";
-        private string gpathdm = @"C:\Program Files{0}\PremiumSoft\Navicat Data Modeler\{1}";
+        private string gpathdm = @"C:\Program Files{0}\PremiumSoft\Navicat Data Modeler 3\{1}";
         private string gpathes = @"C:\Program Files{0}\PremiumSoft\Navicat Premium Essentials {1}\{2}";
         private string gpathre = @"C:\Program Files{0}\PremiumSoft\Navicat Report Viewer\{1}";
         private string gpathmd = @"C:\Program Files{0}\PremiumSoft\Navicat {1} for {2}\{3}";
@@ -137,9 +136,9 @@ namespace Navicat_Keygen_Patch_By_DFoX
             if (rmod.Checked)
             {
                 if (rstd.Checked)
-                    temp_snKey[7] = cMac.Checked ? (byte)0x48 : (byte)0x47;
+                    temp_snKey[7] = cMac.Checked ? (byte)0x48 : (byte)0x84;
                 else if (redu.Checked)
-                    temp_snKey[7] = cMac.Checked ? (byte)0x4B : (byte)0x4A;
+                    temp_snKey[7] = cMac.Checked ? (byte)0x48 : (byte)0x85;
             }
             else if (repo.Checked)
                 temp_snKey[7] = 0x0B;
@@ -409,7 +408,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
                 }
             }
             if (rmod.Checked)
-                temp_snKey[8] = 0x20;   //  High 4-bits = version number. Low 4-bits doesn't know, but can be used to delay activation time.
+                temp_snKey[8] = 0x30;   //  High 4-bits = version number. Low 4-bits doesn't know, but can be used to delay activation time.
             else
                 temp_snKey[8] = (byte)((rn12.Checked || resse12.Checked) ? 0xC0 : 0xB0);
             temp_snKey[9] = 0x00;
@@ -494,7 +493,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
                 MessageBox.Show("Generate First a Serial...", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            string npk = cMac.Checked ? pemmaclin : dirtmp + "RegPrivateKey.pem";
+            string npk = cMac.Checked || clin.Checked ? pemmaclin : dirtmp + "RegPrivateKey.pem";
             if (!File.Exists(npk))
             {
                 pemmaclin = String.Empty;
@@ -502,7 +501,6 @@ namespace Navicat_Keygen_Patch_By_DFoX
                 return;
             }
             byte[] decrypt64rq = null;
-            dynamic jsonnavicat = null;
             string DeviceIdentifier = null;
             string snKey = null;
             StreamReader stReader = new StreamReader(npk);
@@ -519,7 +517,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
             string lic = String.Empty;
             byte[] bytelic = null;
             byte[] licenza = null;
-            if (rn12.Checked || resse12.Checked)
+            if (rn12.Checked || resse12.Checked || rmod.Checked)
             {
                 if (trequestcode.Text.Trim() == String.Empty)
                 {
@@ -541,12 +539,10 @@ namespace Navicat_Keygen_Patch_By_DFoX
                 {
                     eng.Init(false, keys.Private);
                     string dec = Encoding.Default.GetString(eng.ProcessBlock(decrypt64rq, 0, decrypt64rq.Length));
-                    if (rn12.Checked || resse12.Checked)
-                    {
-                        jsonnavicat = JsonConvert.DeserializeObject<dynamic>(dec);
-                        DeviceIdentifier = jsonnavicat.DI;
-                        snKey = jsonnavicat.K;
-                    }
+                    var json = new JavaScriptSerializer();
+                    dynamic dfxj = json.Deserialize<Dictionary<string, object>>(dec);
+                    DeviceIdentifier = dfxj["DI"];
+                    snKey = dfxj["K"];
                 }
                 catch
                 {
@@ -560,7 +556,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
                     MessageBox.Show("Error DI Value is null...", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                lic = String.Format("{{\"K\":\"{0}\", \"DI\":\"{1}\", \"N\":\"{2}\", \"O\":\"{3}\", \"T\":{4}}}"/*, \"P\":\"{2}\"*/, snKey != null ? snKey : tserial.Text.Trim().Replace("-", ""), DeviceIdentifier, tname.Text.Trim(), torganization.Text.Trim(), tval/*, Platform != null ? Platform : cMac.Checked ? "Mac 10.13" : "WIN 8"*/);
+                lic = String.Format("{{\"K\":\"{0}\", \"DI\":\"{1}\", \"N\":\"{2}\", \"O\":\"{3}\", \"T\":{4}}}", snKey != null ? snKey : tserial.Text.Trim().Replace("-", ""), DeviceIdentifier, tname.Text.Trim(), torganization.Text.Trim(), tval);
                 eng.Init(true, keys.Private);
                 bytelic = Encoding.ASCII.GetBytes(lic);
                 licenza = eng.ProcessBlock(bytelic, 0, bytelic.Length);
@@ -576,14 +572,14 @@ namespace Navicat_Keygen_Patch_By_DFoX
             }
             else
             {
-                lic = String.Format("{{\"K\":\"{0}\", \"N\":\"{1}\", \"O\":\"{2}\", \"T\":{3}}}"/*, \"P\":\"{2}\"*/, snKey != null ? snKey : tserial.Text.Trim().Replace("-", ""), tname.Text.Trim(), torganization.Text.Trim(), tval/*, Platform != null ? Platform : cMac.Checked ? "Mac 10.13" : "WIN 8"*/);
+                lic = String.Format("{{\"K\":\"{0}\", \"N\":\"{1}\", \"O\":\"{2}\", \"T\":{3}}}", snKey != null ? snKey : tserial.Text.Trim().Replace("-", ""), tname.Text.Trim(), torganization.Text.Trim(), tval);
                 eng.Init(true, keys.Private);
                 bytelic = Encoding.ASCII.GetBytes(lic);
                 licenza = eng.ProcessBlock(bytelic, 0, bytelic.Length);
                 FolderBrowserDialog folderDlg = new FolderBrowserDialog();
                 folderDlg.ShowNewFolderButton = true;
                 string vers = (resse11.Checked || rn11.Checked) ? "v11" : "v12";
-                folderDlg.Description = "Select Navicat " + ((resse11.Checked || resse12.Checked) ? "Essentials" : "") + ((!rmod.Checked) ? vers : "\"Modeler\"") + " Installation Folder...";
+                folderDlg.Description = "Select Navicat " + ((resse11.Checked || resse12.Checked) ? "Essentials" : "") + ((!rmod.Checked) ? vers : "\"Modeler 3\"") + " Installation Folder...";
                 folderDlg.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 DialogResult result = folderDlg.ShowDialog();
                 if (result == DialogResult.OK)
@@ -597,10 +593,10 @@ namespace Navicat_Keygen_Patch_By_DFoX
                     }
                     catch
                     {
-                        MessageBox.Show("Error on Save Navicat " + ((!rmod.Checked) ? "v11" : "Modeler") + " License File...", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Error on Save Navicat v11 License File...", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
-                    MessageBox.Show("Navicat " + ((!rmod.Checked) ? "v11" : "\"Modeler\"") + " License Saved...", "Info", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                    MessageBox.Show("Navicat v11 License Saved...", "Info", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                     return;
                 }
             }
@@ -609,7 +605,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
         private void CopyToApp(Action<WindowHandleManipulator, IntPtr[]> action)
         {
             string clvalue = combolang.Items[combolang.SelectedIndex].ToString().Trim();
-            string TRegistrationForm = (clvalue != "Simplified Chinese") ? "TRegistrationForm" : "TRegistrationSubForm";
+            string TRegistrationForm = (clvalue != "Simplified Chinese" && !rmod.Checked) ? "TRegistrationForm" : "TRegistrationSubForm";
             string TPanel = "TPanel";
             string TEdit = "TEdit";
             WindowHandleManipulator windowHandleManipulator = new WindowHandleManipulator(2);
@@ -662,7 +658,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
         private void CopyToApp2(Action<WindowHandleManipulator, IntPtr[]> action)
         {
             string clvalue = combolang.Items[combolang.SelectedIndex].ToString().Trim();
-            string TRegistrationForm = (clvalue != "Simplified Chinese") ? "TManualActivationForm" : "TManualActivationSubForm";
+            string TRegistrationForm = (clvalue != "Simplified Chinese" && !rmod.Checked) ? "TManualActivationForm" : "TManualActivationSubForm";
             string TMemo = "TMemo";
             WindowHandleManipulator windowHandleManipulator = new WindowHandleManipulator(2);
             List<IntPtr> list = new List<IntPtr>();
@@ -701,40 +697,48 @@ namespace Navicat_Keygen_Patch_By_DFoX
                 if (rn12.Checked)
                     trequestcode.Text = String.Empty;
                 tactivationcode.Text = String.Empty;
-                Serial = GenerateSnKey();
-                tserial.Text = Serial;
-                if (cautoi.Checked)
-                    CopyToApp(delegate (WindowHandleManipulator manipulator, IntPtr[] editHandles)
-                    {
 
-                        if ((editHandles != null) && (editHandles.Length >= 4))
+                    Serial = GenerateSnKey();
+                    tserial.Text = Serial;
+                    if (cautoi.Checked)
+                        CopyToApp(delegate (WindowHandleManipulator manipulator, IntPtr[] editHandles)
                         {
-                            int startIndex = 0;
-                            string clvalue = combolang.Items[combolang.SelectedIndex].ToString().Trim();
-                            try
+
+                            if ((editHandles != null) && (editHandles.Length >= 4))
                             {
-                                if (clvalue == "Simplified Chinese" || clvalue == "Traditional Chinese")
+                                int startIndex = 0;
+                                string clvalue = combolang.Items[combolang.SelectedIndex].ToString().Trim();
+                                try
                                 {
-                                    manipulator.SetText(editHandles[6], this.Serial.Substring(startIndex, 4));
-                                    manipulator.SetText(editHandles[5], this.Serial.Substring(startIndex += 5, 4));
-                                    manipulator.SetText(editHandles[4], this.Serial.Substring(startIndex += 5, 4));
-                                    manipulator.SetText(editHandles[3], this.Serial.Substring(startIndex + 5, 4));
+                                    if (rmod.Checked)
+                                    {
+                                        manipulator.SetText(editHandles[5], this.Serial.Substring(startIndex, 4));
+                                        manipulator.SetText(editHandles[4], this.Serial.Substring(startIndex += 5, 4));
+                                        manipulator.SetText(editHandles[3], this.Serial.Substring(startIndex += 5, 4));
+                                        manipulator.SetText(editHandles[2], this.Serial.Substring(startIndex + 5, 4));
+                                    }
+                                    else if (clvalue == "Simplified Chinese" || clvalue == "Traditional Chinese" )
+                                    {
+                                        manipulator.SetText(editHandles[6], this.Serial.Substring(startIndex, 4));
+                                        manipulator.SetText(editHandles[5], this.Serial.Substring(startIndex += 5, 4));
+                                        manipulator.SetText(editHandles[4], this.Serial.Substring(startIndex += 5, 4));
+                                        manipulator.SetText(editHandles[3], this.Serial.Substring(startIndex + 5, 4));
+                                    }
+                                    else
+                                    {
+                                        manipulator.SetText(editHandles[3], this.Serial.Substring(startIndex, 4));
+                                        manipulator.SetText(editHandles[2], this.Serial.Substring(startIndex += 5, 4));
+                                        manipulator.SetText(editHandles[1], this.Serial.Substring(startIndex += 5, 4));
+                                        manipulator.SetText(editHandles[0], this.Serial.Substring(startIndex + 5, 4));
+                                    }
                                 }
-                                else
+                                catch
                                 {
-                                    manipulator.SetText(editHandles[3], this.Serial.Substring(startIndex, 4));
-                                    manipulator.SetText(editHandles[2], this.Serial.Substring(startIndex += 5, 4));
-                                    manipulator.SetText(editHandles[1], this.Serial.Substring(startIndex += 5, 4));
-                                    manipulator.SetText(editHandles[0], this.Serial.Substring(startIndex + 5, 4));
-                                }
-                            }
-                            catch
-                            {
                                 //Nothing
                             }
+                            }
                         }
-                    }
-                    );
+                        );
             }
             catch
             {
@@ -812,7 +816,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
 
         private void checkdigit_KeyPress(object sender, KeyPressEventArgs e)
         {
-            e.Handled = !(char.IsLetter(e.KeyChar) || char.IsDigit(e.KeyChar) || e.KeyChar == (char)Keys.Back);
+            e.Handled = !(char.IsLetter(e.KeyChar) || char.IsDigit(e.KeyChar) || e.KeyChar == (char)Keys.Back || e.KeyChar == (char)Keys.Space);
         }
 
         private void trequestcode_TextChanged(object sender, EventArgs e)
@@ -993,10 +997,10 @@ namespace Navicat_Keygen_Patch_By_DFoX
                 p.StartInfo.Verb = "runas";
             p.StartInfo.Arguments = " \"" + Path.GetDirectoryName(file) + "\"";
             p.Start();
-            using (var timer = new System.Threading.Timer(delegate { tp(); }, null, 30000, Timeout.Infinite))
+            using (var timer = new System.Threading.Timer(delegate { tp(); }, null, 60000, Timeout.Infinite))
             {
-                string error = p.StandardOutput.ReadToEnd();
-                if (error.Contains("Patch has been done successfully"))
+                string error = p.StandardOutput.ReadToEnd().ToLower();
+                if (error.Contains("patch has been done successfully"))
                 {
                     if (clin.Checked)
                     {
@@ -1132,7 +1136,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
         {
             tserial.Text = String.Empty;
             tactivationcode.Text = String.Empty;
-            bool ed = rn11.Checked || rmod.Checked || repo.Checked ? false : true;
+            bool ed = rn11.Checked || repo.Checked ? false : true;
             if (resse11.Checked || resse12.Checked)
             {
                 this.Icon = Resources.Essentials;
@@ -1189,61 +1193,18 @@ namespace Navicat_Keygen_Patch_By_DFoX
 
         private void linna_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            apriUrl(@"https://navicat.com");
+            Process.Start(@"https://navicat.com");
         }
 
         private void linkur_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            apriUrl(@"https://www.dfox.it");
+            Process.Start(@"https://www.dfox.it");
         }
-        private static string ottieniLaPathBrowser()
-        {
-            string name = string.Empty;
-            RegistryKey regKey = null;
-            try
-            {
-                var regDefault = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\.htm\\UserChoice", false);
-                var stringDefault = regDefault.GetValue("ProgId");
-
-                regKey = Registry.ClassesRoot.OpenSubKey(stringDefault + "\\shell\\open\\command", false);
-                name = regKey.GetValue(null).ToString().ToLower().Replace("" + (char)34, "");
-
-                if (!name.EndsWith("exe"))
-                    name = name.Substring(0, name.LastIndexOf(".exe") + 4);
-
-            }
-            catch
-            {
-                return String.Empty;
-            }
-            finally
-            {
-                if (regKey != null)
-                    regKey.Close();
-            }
-            return name;
-        }
-        public void apriUrl(string url)
-        {
-            try
-            {
-                string browserPath = ottieniLaPathBrowser();
-                if (browserPath == string.Empty)
-                    browserPath = "iexplore";
-                Process process = new Process();
-                process.StartInfo = new ProcessStartInfo(browserPath);
-                process.StartInfo.Arguments = url;
-                process.Start();
-            }
-            catch
-            {
-                //Nothing
-            }
-        }
-
         private void NC_Load(object sender, EventArgs e)
         {
             this.Icon = ico;
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            this.Text = String.Format("Navicat Products - Patch/Keygen v{0}.{1}", version.Major, version.Minor);
             CultureInfo ci = CultureInfo.InstalledUICulture;
             string ln = ci.Name.ToString().Trim();
             for (int cmm = 0; cmm < 0xFF + 1; cmm++)
@@ -1390,7 +1351,7 @@ namespace Navicat_Keygen_Patch_By_DFoX
                         {
                             using (StreamWriter stream = new StreamWriter(hostPath, true, Encoding.Default))
                             {
-                                stream.WriteLine(Environment.NewLine + cosascrivere);
+                                stream.WriteLine(cosascrivere);
                             }
                         }
                     }
@@ -1439,7 +1400,6 @@ namespace Navicat_Keygen_Patch_By_DFoX
             if (cMac.Checked)
             {
                 clin.Checked = false;
-                g1.Enabled = false;
                 cautoi.Checked = false;
                 cautoi.Enabled = false;
                 EncodeTable = "ABCDEFGH8JKLMN9PQRSTUVWXYZ234567";
@@ -1454,7 +1414,6 @@ namespace Navicat_Keygen_Patch_By_DFoX
             else
             {
                 pemmaclin = String.Empty;
-                g1.Enabled = true;
                 cautoi.Checked = true;
                 cautoi.Enabled = true;
                 tserial.Text = String.Empty;

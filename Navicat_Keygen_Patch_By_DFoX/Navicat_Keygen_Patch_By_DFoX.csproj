@@ -46,13 +46,9 @@
       <HintPath>.\BouncyCastle.Crypto.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -102,9 +98,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\DataModeler.ico" />
     <None Include="Resources\NP_x64.exe" />
     <None Include="Resources\NP_x32.exe" />
-    <EmbeddedResource Include="Newtonsoft.Json.dll" />
     <EmbeddedResource Include="BouncyCastle.Crypto.dll" />
     <Content Include="navicat_MAINICON.ico" />
     <None Include="Resources\MongoDB.ico" />
@@ -116,7 +112,6 @@
     <None Include="Resources\MySQL.ico" />
     <None Include="Resources\MariaDB.ico" />
     <None Include="Resources\Essentials.ico" />
-    <None Include="Resources\DataModeler.ico" />
     <None Include="Resources\SQLserver.ico" />
     <None Include="Resources\ita.png" />
   </ItemGroup>
